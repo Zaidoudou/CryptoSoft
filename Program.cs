@@ -29,9 +29,6 @@ namespace CryptoSoft
             var encryptionService = serviceProvider.GetRequiredService<IEncryptionService>();
             var configService = serviceProvider.GetRequiredService<IConfigurationService>();
 
-            // Create stopwatch to measure execution time
-            var stopwatch = new Stopwatch();
-
             try
             {
                 // Validate arguments
@@ -53,108 +50,44 @@ namespace CryptoSoft
 
                 // Get encryption key from configuration
                 ulong encryptionKey = configService.GetEncryptionKey();
-
-                // Start timing
-                stopwatch.Start();
+                encryptionService.EncryptionKey = encryptionKey;
 
                 // Check if path is a file or directory
                 if (File.Exists(path))
                 {
                     // Process single file
-                    await ProcessFileAsync(encryptionService, operation, path, encryptionKey);
+                    if (operation == "encrypt")
+                    {
+                        return await encryptionService.EncryptFileAsync(path);
+                    }
+                    else
+                    {
+                        return await encryptionService.DecryptFileAsync(path);
+                    }
                 }
                 else if (Directory.Exists(path))
                 {
                     // Process directory recursively
-                    await ProcessDirectoryAsync(encryptionService, operation, path, encryptionKey);
+                    if (operation == "encrypt")
+                    {
+                        return await encryptionService.EncryptDirectoryAsync(path);
+                    }
+                    else
+                    {
+                        return await encryptionService.DecryptDirectoryAsync(path);
+                    }
                 }
                 else
                 {
                     Console.Error.WriteLine($"Path not found: {path}");
                     return -3;
                 }
-
-                // Stop timing
-                stopwatch.Stop();
-
-                // Return execution time in milliseconds (positive value indicates success)
-                return (int)stopwatch.ElapsedMilliseconds;
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"Error: {ex.Message}");
                 return -4; // Error code for general exceptions
             }
-        }
-
-        private static async Task ProcessFileAsync(IEncryptionService encryptionService, string operation, string filePath, ulong key)
-        {
-            if (operation == "encrypt")
-            {
-                await encryptionService.EncryptFileAsync(filePath, key);
-            }
-            else
-            {
-                await encryptionService.DecryptFileAsync(filePath, key);
-            }
-        }
-
-        private static async Task ProcessDirectoryAsync(IEncryptionService encryptionService, string operation, string directoryPath, ulong key)
-        {
-            // Get all files in the directory and subdirectories
-            string[] files = Directory.GetFiles(directoryPath, "*.*", SearchOption.AllDirectories);
-
-            // Filter out files that shouldn't be encrypted
-            files = files.Where(f => ShouldProcessFile(f)).ToArray();
-
-            Console.WriteLine($"Found {files.Length} files to process...");
-
-            // Process each file
-            for (int i = 0; i < files.Length; i++)
-            {
-                string file = files[i];
-                try
-                {
-                    Console.Write($"Processing {i + 1}/{files.Length}: {file}... ");
-                    await ProcessFileAsync(encryptionService, operation, file, key);
-                    Console.WriteLine("Done");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Failed: {ex.Message}");
-                }
-            }
-        }
-
-        private static bool ShouldProcessFile(string filePath)
-        {
-            // Get file extension
-            string extension = Path.GetExtension(filePath).ToLower();
-
-            // List of extensions to process
-            string[] processableExtensions = new[]
-            {
-                ".cs", ".js", ".py", ".java", ".cpp", ".h", ".hpp", ".c", ".txt",
-                ".json", ".xml", ".html", ".css", ".md", ".sql", ".ts", ".tsx",
-                ".jsx", ".vue", ".php", ".rb", ".go", ".rs", ".swift", ".kt",
-            };
-
-            // List of directories to skip
-            string[] skipDirectories = new[]
-            {
-                "bin", "obj", "node_modules", ".git", ".vs", "dist", "build",
-                "target", "Debug", "Release", "packages",
-            };
-
-            // Skip files in excluded directories
-            string directory = Path.GetDirectoryName(filePath) ?? string.Empty;
-            if (skipDirectories.Any(d => directory.Contains(Path.DirectorySeparatorChar + d + Path.DirectorySeparatorChar)))
-            {
-                return false;
-            }
-
-            // Process only files with specified extensions
-            return processableExtensions.Contains(extension);
         }
 
         private static ServiceProvider ConfigureServices()

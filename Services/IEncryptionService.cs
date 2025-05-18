@@ -12,19 +12,36 @@ namespace CryptoSoft.Services
   public interface IEncryptionService
   {
       /// <summary>
+      /// Gets or sets the encryption key.
+      /// </summary>
+      ulong EncryptionKey { get; set; }
+
+      /// <summary>
       /// Encrypts a file in place.
       /// </summary>
       /// <param name="filePath">The path to the file to encrypt.</param>
-      /// <param name="key">The encryption key.</param>
-      /// <returns>A task representing the asynchronous operation.</returns>
-      Task EncryptFileAsync(string filePath, ulong key);
+      /// <returns>A task representing the asynchronous operation. Returns execution time in milliseconds on success, negative value on failure.</returns>
+      Task<int> EncryptFileAsync(string filePath);
 
       /// <summary>
       /// Decrypts a file in place.
       /// </summary>
       /// <param name="filePath">The path to the file to decrypt.</param>
-      /// <param name="key">The decryption key.</param>
-      /// <returns>A task representing the asynchronous operation.</returns>
-      Task DecryptFileAsync(string filePath, ulong key);
+      /// <returns>A task representing the asynchronous operation. Returns execution time in milliseconds on success, negative value on failure.</returns>
+      Task<int> DecryptFileAsync(string filePath);
+
+      /// <summary>
+      /// Encrypts all files in a directory recursively.
+      /// </summary>
+      /// <param name="directoryPath">The path to the directory to encrypt.</param>
+      /// <returns>A task representing the asynchronous operation. Returns execution time in milliseconds on success, negative value on failure.</returns>
+      Task<int> EncryptDirectoryAsync(string directoryPath);
+
+      /// <summary>
+      /// Decrypts all files in a directory recursively.
+      /// </summary>
+      /// <param name="directoryPath">The path to the directory to decrypt.</param>
+      /// <returns>A task representing the asynchronous operation. Returns execution time in milliseconds on success, negative value on failure.</returns>
+      Task<int> DecryptDirectoryAsync(string directoryPath);
   }
 }
