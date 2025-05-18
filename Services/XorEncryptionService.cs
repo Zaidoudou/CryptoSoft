@@ -21,7 +21,7 @@ namespace CryptoSoft.Services
         /// <returns>A task representing the asynchronous operation.</returns>
         public async Task EncryptFileAsync(string filePath, ulong key)
         {
-            await ProcessFileInPlaceAsync(filePath, key);
+            await this.ProcessFileInPlaceAsync(filePath, key);
         }
 
         /// <summary>
@@ -33,14 +33,14 @@ namespace CryptoSoft.Services
         public async Task DecryptFileAsync(string filePath, ulong key)
         {
             // XOR encryption is symmetric, so decryption is the same as encryption
-            await ProcessFileInPlaceAsync(filePath, key);
+            await this.ProcessFileInPlaceAsync(filePath, key);
         }
 
         private async Task ProcessFileInPlaceAsync(string filePath, ulong key)
         {
             // Create a temporary file for processing
             string tempFile = Path.GetTempFileName();
-            
+
             try
             {
                 // Create a byte array from the key (64 bits = 8 bytes)
@@ -77,6 +77,7 @@ namespace CryptoSoft.Services
                 {
                     File.Delete(tempFile);
                 }
+
                 throw;
             }
         }
