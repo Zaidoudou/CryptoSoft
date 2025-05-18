@@ -1,14 +1,137 @@
 # CryptoSoft
 
-A cross-platform file encryption/decryption tool using XOR bit-by-bit encryption with a 64-bit key. This project is designed to be used both as a standalone command-line application and as a service within the EasySave application.
+A lightweight, cross-platform file encryption tool written in C#. CryptoSoft provides both single-file and batch encryption capabilities, making it perfect for securing individual files or entire projects.
 
 ## Features
 
-- XOR bit-by-bit encryption/decryption with 64-bit key
-- Cross-platform (Windows, macOS, Linux)
-- Command-line interface
-- Service integration capability for the EasySave application
-- Configuration of encryption key via settings file
+- **Cross-Platform**: Works on Windows, macOS, and Linux
+- **Dual Operation Modes**:
+  - Single file encryption/decryption
+  - Recursive folder encryption/decryption
+- **Smart File Processing**:
+  - Automatically detects file vs folder paths
+  - Skips binary files and build artifacts
+  - Processes only relevant source code files
+- **Progress Reporting**:
+  - Shows number of files to process
+  - Displays real-time progress
+  - Reports success/failure for each operation
+- **Configurable Encryption**:
+  - Custom encryption key support
+  - Default key fallback
+  - Key configuration via appsettings.json
+
+## Supported File Types
+
+CryptoSoft processes the following file types:
+- `.cs` - C# source files
+- `.js` - JavaScript files
+- `.py` - Python files
+- `.java` - Java source files
+- `.cpp`, `.h`, `.hpp`, `.c` - C/C++ files
+- `.txt` - Text files
+- `.json` - JSON files
+- `.xml` - XML files
+- `.html`, `.css` - Web files
+- `.md` - Markdown files
+- `.sql` - SQL files
+- `.ts`, `.tsx` - TypeScript files
+- `.jsx` - React JSX files
+- `.vue` - Vue.js files
+- `.php` - PHP files
+- `.rb` - Ruby files
+- `.go` - Go files
+- `.rs` - Rust files
+- `.swift` - Swift files
+- `.kt` - Kotlin files
+
+## Excluded Directories
+
+The following directories are automatically skipped during batch processing:
+- `bin`
+- `obj`
+- `node_modules`
+- `.git`
+- `.vs`
+- `dist`
+- `build`
+- `target`
+- `Debug`
+- `Release`
+- `packages`
+
+## Installation
+
+1. Download the latest release for your platform
+2. Extract the files to your desired location
+3. Make sure you have the .NET 9.0 runtime installed
+
+## Configuration
+
+Create an `appsettings.json` file in the same directory as the executable with the following structure:
+
+```json
+{
+  "EncryptionSettings": {
+    "Key": 12345678901234567890
+  }
+}
+```
+
+You can use either:
+- Decimal format: `"Key": 12345678901234567890`
+- Hexadecimal format: `"Key": "0x0123456789ABCDEF"`
+
+If no key is specified, a default key will be used.
+
+## Usage
+
+### Single File Encryption/Decryption
+
+```bash
+cryptosoft [encrypt|decrypt] path/to/file
+```
+
+Example:
+```bash
+cryptosoft encrypt myfile.cs
+cryptosoft decrypt myfile.cs
+```
+
+### Batch Folder Encryption/Decryption
+
+```bash
+cryptosoft [encrypt|decrypt] path/to/folder
+```
+
+Example:
+```bash
+cryptosoft encrypt ./myproject
+cryptosoft decrypt ./myproject
+```
+
+## Return Codes
+
+- Positive number: Success (execution time in milliseconds)
+- -1: Invalid argument count
+- -2: Invalid operation
+- -3: File/folder not found
+- -4: General exception
+
+## Building from Source
+
+1. Clone the repository
+2. Navigate to the project directory
+3. Run `dotnet build`
+4. Find the executable in the `bin` directory
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Solution Structure
 
