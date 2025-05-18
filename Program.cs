@@ -1,16 +1,28 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using CryptoSoft.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿// <copyright file="Program.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace CryptoSoft
 {
-    class Program
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Threading.Tasks;
+    using CryptoSoft.Services;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+
+    /// <summary>
+    /// Main program class.
+    /// </summary>
+    public class Program
     {
-        static async Task<int> Main(string[] args)
+        /// <summary>
+        /// Main method.
+        /// </summary>
+        /// <param name="args">The command line arguments.</param>
+        /// <returns>The exit code.</returns>
+        public static async Task<int> Main(string[] args)
         {
             // Set up dependency injection
             var serviceProvider = ConfigureServices();
@@ -19,7 +31,7 @@ namespace CryptoSoft
 
             // Create stopwatch to measure execution time
             var stopwatch = new Stopwatch();
-            
+
             try
             {
                 // Validate arguments
@@ -64,21 +76,21 @@ namespace CryptoSoft
         private static ServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
-            
+
             // Add configuration service
             services.AddSingleton<IConfigurationService, ConfigurationService>();
-            
+
             // Add encryption service
             services.AddSingleton<IEncryptionService, XorEncryptionService>();
-            
+
             // Build configuration
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .Build();
-            
+
             services.AddSingleton<IConfiguration>(configuration);
-            
+
             return services.BuildServiceProvider();
         }
     }
