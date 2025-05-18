@@ -7,17 +7,24 @@ namespace CryptoSoft.Services
   using System.Threading.Tasks;
 
   /// <summary>
-  /// Interface for encryption services.
+  /// Interface for encryption service.
   /// </summary>
   public interface IEncryptionService
   {
       /// <summary>
-      /// Process a file using encryption/decryption.
+      /// Encrypts a file in place.
       /// </summary>
-      /// <param name="sourceFilePath">The path to the source file.</param>
-      /// <param name="destinationFilePath">The path to the destination file.</param>
-      /// <param name="key">The key to use for encryption/decryption.</param>
+      /// <param name="filePath">The path to the file to encrypt.</param>
+      /// <param name="key">The encryption key.</param>
       /// <returns>A task representing the asynchronous operation.</returns>
-      Task ProcessFileAsync(string sourceFilePath, string destinationFilePath, ulong key);
+      Task EncryptFileAsync(string filePath, ulong key);
+
+      /// <summary>
+      /// Decrypts a file in place.
+      /// </summary>
+      /// <param name="filePath">The path to the file to decrypt.</param>
+      /// <param name="key">The decryption key.</param>
+      /// <returns>A task representing the asynchronous operation.</returns>
+      Task DecryptFileAsync(string filePath, ulong key);
   }
 }

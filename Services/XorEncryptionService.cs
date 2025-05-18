@@ -14,43 +14,70 @@ namespace CryptoSoft.Services
     public class XorEncryptionService : IEncryptionService
     {
         /// <summary>
-        /// Process a file using XOR encryption/decryption.
+        /// Encrypts a file in place using XOR encryption.
         /// </summary>
-        /// <param name="sourceFilePath">The path to the source file.</param>
-        /// <param name="destinationFilePath">The path to the destination file.</param>
-        /// <param name="key">The key to use for encryption/decryption.</param>
+        /// <param name="filePath">The path to the file to encrypt.</param>
+        /// <param name="key">The encryption key.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task ProcessFileAsync(string sourceFilePath, string destinationFilePath, ulong key)
+        public async Task EncryptFileAsync(string filePath, ulong key)
         {
-            // Create destination directory if it doesn't exist
-            string? destinationDir = Path.GetDirectoryName(destinationFilePath);
-            if (!string.IsNullOrEmpty(destinationDir) && !Directory.Exists(destinationDir))
-            {
-                Directory.CreateDirectory(destinationDir);
-            }
+            await ProcessFileInPlaceAsync(filePath, key);
+        }
 
-            // Create a byte array from the key (64 bits = 8 bytes)
-            byte[] keyBytes = BitConverter.GetBytes(key);
+        /// <summary>
+        /// Decrypts a file in place using XOR decryption.
+        /// </summary>
+        /// <param name="filePath">The path to the file to decrypt.</param>
+        /// <param name="key">The decryption key.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public async Task DecryptFileAsync(string filePath, ulong key)
+        {
+            // XOR encryption is symmetric, so decryption is the same as encryption
+            await ProcessFileInPlaceAsync(filePath, key);
+        }
 
-            // Use streams for efficient file processing
-            using (FileStream sourceStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read))
-            using (FileStream destinationStream = new FileStream(destinationFilePath, FileMode.Create, FileAccess.Write))
+        private async Task ProcessFileInPlaceAsync(string filePath, ulong key)
+        {
+            // Create a temporary file for processing
+            string tempFile = Path.GetTempFileName();
+            
+            try
             {
-                byte[] buffer = new byte[4096]; // 4KB buffer for reading
-                int bytesRead;
+                // Create a byte array from the key (64 bits = 8 bytes)
+                byte[] keyBytes = BitConverter.GetBytes(key);
 
                 // Process the file in chunks
-                while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                using (FileStream sourceStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                using (FileStream tempStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write))
                 {
-                    // Apply XOR encryption/decryption to the buffer
-                    for (int i = 0; i < bytesRead; i++)
-                    {
-                        buffer[i] = (byte)(buffer[i] ^ keyBytes[i % keyBytes.Length]);
-                    }
+                    byte[] buffer = new byte[4096]; // 4KB buffer for reading
+                    int bytesRead;
 
-                    // Write encrypted/decrypted data to destination
-                    await destinationStream.WriteAsync(buffer, 0, bytesRead);
+                    while ((bytesRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    {
+                        // Apply XOR encryption/decryption to the buffer
+                        for (int i = 0; i < bytesRead; i++)
+                        {
+                            buffer[i] = (byte)(buffer[i] ^ keyBytes[i % keyBytes.Length]);
+                        }
+
+                        // Write processed data to temp file
+                        await tempStream.WriteAsync(buffer, 0, bytesRead);
+                    }
                 }
+
+                // Replace original file with processed file
+                File.Delete(filePath);
+                File.Move(tempFile, filePath);
+            }
+            catch
+            {
+                // Clean up temp file if something goes wrong
+                if (File.Exists(tempFile))
+                {
+                    File.Delete(tempFile);
+                }
+                throw;
             }
         }
     }

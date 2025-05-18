@@ -37,18 +37,25 @@ namespace CryptoSoft
                 // Validate arguments
                 if (args.Length != 2)
                 {
-                    Console.Error.WriteLine("Usage: cryptosoft source_file destination_file");
+                    Console.Error.WriteLine("Usage: cryptosoft [encrypt|decrypt] file_path");
                     return -1;
                 }
 
-                string sourceFile = args[0];
-                string destinationFile = args[1];
+                string operation = args[0].ToLower();
+                string filePath = args[1];
 
-                // Validate source file
-                if (!File.Exists(sourceFile))
+                // Validate operation
+                if (operation != "encrypt" && operation != "decrypt")
                 {
-                    Console.Error.WriteLine($"Source file not found: {sourceFile}");
+                    Console.Error.WriteLine("Invalid operation. Use 'encrypt' or 'decrypt'.");
                     return -2;
+                }
+
+                // Validate file
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return -3;
                 }
 
                 // Get encryption key from configuration
@@ -57,8 +64,15 @@ namespace CryptoSoft
                 // Start timing
                 stopwatch.Start();
 
-                // Perform encryption
-                await encryptionService.ProcessFileAsync(sourceFile, destinationFile, encryptionKey);
+                // Perform operation
+                if (operation == "encrypt")
+                {
+                    await encryptionService.EncryptFileAsync(filePath, encryptionKey);
+                }
+                else
+                {
+                    await encryptionService.DecryptFileAsync(filePath, encryptionKey);
+                }
 
                 // Stop timing
                 stopwatch.Stop();
@@ -69,7 +83,7 @@ namespace CryptoSoft
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"Error: {ex.Message}");
-                return -3; // Error code for general exceptions
+                return -4; // Error code for general exceptions
             }
         }
 
